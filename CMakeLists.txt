@@ -8,7 +8,9 @@ include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 
 add_executable(monitor ${SOURCES})
+target_link_libraries(monitor stdc++fs)
 
+set(CMAKE_CXX_STANDARD 17)
 set_property(TARGET monitor PROPERTY CXX_STANDARD 17)
 target_link_libraries(monitor ${CURSES_LIBRARIES})
 # TODO: Run -Werror in CI.

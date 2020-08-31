@@ -1,33 +1,52 @@
+#include "process.h"
+
+#include <linux_parser.h>
 #include <unistd.h>
+
 #include <cctype>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "process.h"
-
 using std::string;
 using std::to_string;
 using std::vector;
 
-// TODO: Return this process's ID
-int Process::Pid() { return 0; }
+// CREDIT:
+// https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
 
-// TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+int Process::Pid() { return pid_; }
 
-// TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+void Process::Pid(int p) { pid_ = p; }
 
-// TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+float Process::CpuUtilization() { return cpu_utilization_; }
 
-// TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
+void Process::CpuUtilization(const std::vector<string> &cpu_utilization,
+                             long uptime) {
+  float utime{stof(cpu_utilization[0])};
+  float stime{stof(cpu_utilization[1])};
+  long starttime{stol(cpu_utilization[2])};
 
-// TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+  float total_time = utime + stime;
 
-// TODO: Overload the "less than" comparison operator for Process objects
-// REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+  long hertz = sysconf(_SC_CLK_TCK);
+  long seconds = uptime - (starttime / hertz);
+  float cpu_usage = (total_time / hertz) / seconds;
+  cpu_utilization_ = cpu_usage;
+}
+
+string Process::Command() { return cmdline_; }
+
+void Process::Command(std::string cmdline) { cmdline_ = cmdline; }
+
+string Process::Ram() { return ram_; }
+
+void Process::Ram(std::string ram) { ram_ = ram; }
+
+string Process::User() { return user_; }
+
+void Process::User(std::string user) { user_ = user; }
+
+long int Process::UpTime() { return uptime_; }
+
+void Process::UpTime(long int uptime) { uptime_ = uptime; }
